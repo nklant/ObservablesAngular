@@ -1,24 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 // tslint:disable-next-line:import-blacklist
 import 'rxjs/Rx';
-// tslint:disable-next-line:import-blacklist
-import { Observer } from 'rxjs/Rx';
+import { Observer } from 'rxjs/Observer';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
-
-  number: number;
+export class HomeComponent implements OnInit, OnDestroy {
+  numbersObsSubscription: Subscription;
+  customObsSubscription: Subscription;
 
   constructor() { }
 
   ngOnInit() {
-    const myNumbers = Observable.interval(1000);
-    myNumbers.subscribe(
+    const myNumbers = Observable.interval(1000)
+      .map(
+        (data: number) => {
+          return data * 2;
+        }
+      );
+    this.numbersObsSubscription = myNumbers.subscribe(
       (number: number) => {
         console.log(number);
       }
@@ -38,10 +43,15 @@ export class HomeComponent implements OnInit {
         observer.next('third package');
       }, 7000);
     });
-    myObservable.subscribe(
+    this.customObsSubscription = myObservable.subscribe(
       (data: string) => { console.log(data); },
       (error: string) => { console.log(error); },
       () => { console.log('completed'); }
     );
+  }
+
+  ngOnDestroy() {
+    this.numbersObsSubscription.unsubscribe();
+    this.customObsSubscription.unsubscribe();
   }
 }
